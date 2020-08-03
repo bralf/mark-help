@@ -12,9 +12,13 @@ for prefile in 1-Unmarked/*/* ; do
     folder=${path%/*}
     partno=${folder//[^0-9]}
 
-    echo "${partno}" >> PartIDs.txt
+    echo "${partno}" >> PartIDs-temp.txt
     
     cp -r "$prefile" "2-Flat/${partno}-${file}"
     echo "Copied Participant ${partno} file ${file}"
     
 done
+
+sort -u PartIDs-temp.txt > PartIDs.txt
+rm PartIDs-temp.txt
+

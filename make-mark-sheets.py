@@ -1,5 +1,6 @@
 import xlsxwriter
 from xlsxwriter.utility import xl_rowcol_to_cell, xl_cell_to_rowcol, xl_range
+import csv
 
 # Assignment dependent data
 participant_path = 'PartIDs.txt' #Participant IDs
@@ -14,23 +15,33 @@ codes = ([0,0,"Question not attempted or totally wrong"], #Code, percent awarded
 sheet_tl = '$A$1' #Top left corner of the grades
 codes_tl = '$J$2' #Top left corner of the mark codes box.
 
-
-# Creates the workbook and adds a template sheet
+# Creates the workbook
 workbook = xlsxwriter.Workbook('grades.xlsx')
-template= workbook.add_worksheet('template')
 
-# Creates a sheet for each participant
+# Adds a master sheet
+master = workbook.add_worksheet('master')
+with open('master.csv', 'r') as f:
+    reader = csv.reader(f)
+    for r, row in enumerate(reader):
+        for c, col in enumerate(row):
+            master.write(r, c, col)
+
+
+# Creates a template sheet and a sheet for each participant
+template = workbook.add_worksheet('template')
 participants = []
 with open(participant_path) as inputfile:
     for line in inputfile:
         participants.append(int(line.strip()))
-participants = list(set(participants))
 
 worksheets = []
 for i in participants:
     worksheets.append(workbook.add_worksheet(str(i)))
 
 for worksheet in workbook.worksheets():
+
+    if worksheet.get_name() == 'master':
+        continue
 
     (trow,lcol) = xl_cell_to_rowcol(sheet_tl)
     # Adds column headings to each sheet
@@ -73,14 +84,20 @@ for worksheet in workbook.worksheets():
 
     # Add Totals
     mark_range = xl_range(trow+1,lcol+2,row-1,lcol+2)
+    st_cell = xl_rowcol_to_cell (row, lcol+2)
     mod_cell = xl_rowcol_to_cell (row+1, lcol+2)
     fb_range = xl_range(trow+1, lcol+6, row-1, lcol+6)
+    row+=1
+    worksheet.write(row, lcol, 'Subtotal')
+    worksheet.write_formula(row, lcol+2, f'=SUM({mark_range})')
     row+=1
     worksheet.write(row, lcol, 'Modifier')
     worksheet.write(row, lcol+2, 0)
     row+=1
     worksheet.write(row, lcol, 'Total')
-    worksheet.write_array_formula(row, lcol+2, row, lcol+2, '=SUM(%s)' % (mark_range))
-    worksheet.write(row,lcol+5, 'Total Feedback')
+    worksheet.write_formula(row, lcol+2, f'=_xlfn.CEILING.MATH({st_cell}+{mod_cell})')
+    worksheet.write(row-1,lcol+6, 'Total Feedback')
     worksheet.write_formula(row,lcol+6,f'=_xlfn.CONCAT({fb_range})')
+
+
 workbook.close()
