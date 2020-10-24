@@ -100,7 +100,7 @@ for worksheet in workbook.worksheets():
         fb_cell = xl_rowcol_to_cell(row, lcol + 5)
         codes_range = xl_range(trow_codes,lcol_codes,trow_codes+len(codes), lcol_codes+1)
         worksheet.write(row, lcol, question)
-        worksheet.write_formula(row,2, f'=VLOOKUP({code_cell},{codes_range},2,FALSE)/100*{max_cell}')
+        worksheet.write_formula(row,2, f'=ROUND(VLOOKUP({code_cell},{codes_range},2,FALSE)/100*{max_cell},0)')
         worksheet.write(row, lcol+3, "/")
         worksheet.write(row, lcol+4, max)
         worksheet.write_formula(row, lcol+6, f'=_xlfn.CONCAT("Q",{q_cell},": ",{mark_cell},"/",{max_cell}," ",{fb_cell},"<br>")')
@@ -108,8 +108,8 @@ for worksheet in workbook.worksheets():
 
     # Add Totals
     mark_range = xl_range(trow+1,lcol+2,row-1,lcol+2)
-    st_cell = xl_rowcol_to_cell (row, lcol+2)
-    mod_cell = xl_rowcol_to_cell (row+1, lcol+2)
+    st_cell = xl_rowcol_to_cell (row+1, lcol+2)
+    mod_cell = xl_rowcol_to_cell (row+2, lcol+2)
     fb_range = xl_range(trow+1, lcol+6, row-1, lcol+6)
     row+=1
     worksheet.write(row, lcol, 'Subtotal',bold)
