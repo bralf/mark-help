@@ -3,9 +3,10 @@ from xlsxwriter.utility import xl_rowcol_to_cell, xl_cell_to_rowcol, xl_range
 import csv
 
 # Assignment dependent data
-participant_path = 'PartIDs.txt' #Participant IDs
-questions = ([1.1,5],[1.2,6],[2.1,4],[2.2,5]) #Questions and marks
-codes = ([0,0,"Question not attempted or totally wrong"], #Code, percent awarded, description
+participant_path = 'PartIDs.txt' # Participant IDs .txt filepath
+master_path = 'master.csv' # Master .csv filepath
+questions = ([1.1,5],[1.2,6],[2.1,4],[2.2,5]) # Questions and marks
+codes = ([0,0,"Question not attempted or totally wrong"], # Code, percent awarded, description
          [1,25,"Partial credit, still wrong"],
          [2,50,"Pass mark, question understood"],
          [3,75,"Silly mistake"],
@@ -21,6 +22,7 @@ with open(participant_path) as inputfile:
     for line in inputfile:
         participants.append(line.strip())
 par_num = len(participants)
+id_length = len(participants[0])
 
 # Creates the workbook
 workbook = xlsxwriter.Workbook('grades.xlsx')
@@ -43,11 +45,11 @@ total_cell    = xl_rowcol_to_cell(len(questions)+4,lcol+2)
 total_fb_cell = xl_rowcol_to_cell(len(questions)+4,lcol+6)
 
 # Writes master sheet
-with open('master.csv', 'r') as f:
+with open(master_path, 'r') as f:
     reader = csv.reader(f)
     for r, row in enumerate(reader):
         r1 = xl_rowcol_to_cell(r,1)
-        master.write_formula(r,0,f'=RIGHT({r1},4)')
+        master.write_formula(r,0,f'=RIGHT({r1},{id_length})')
         for c, col in enumerate(row):
             if (r == 0):
                 master.write(r, c+1, col,bold)
