@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Flattens a depth-two folder of submissions into a single folder.
 
